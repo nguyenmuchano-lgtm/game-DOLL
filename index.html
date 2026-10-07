@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Búp Bê Nấu Ăn 🍳</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #fff0f5, #ffe4e1);
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #d81b60;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #888;
+            margin-bottom: 20px;
+        }
+        .game-container {
+            background: white;
+            max-width: 550px;
+            margin: 0 auto;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .doll-area {
+            font-size: 70px;
+            margin-bottom: 10px;
+        }
+        .speech-bubble {
+            background: #ffe4e1;
+            padding: 10px 15px;
+            border-radius: 15px;
+            display: inline-block;
+            font-size: 16px;
+            color: #c2185b;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .kitchen-section {
+            margin-bottom: 20px;
+        }
+        .kitchen-section h3 {
+            color: #ad1457;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .ingredients, .tools {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .item-btn {
+            background-color: #fff;
+            border: 2px solid #f8bbd0;
+            padding: 10px 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .item-btn:hover {
+            background-color: #fce4ec;
+            transform: translateY(-2px);
+            border-color: #ec407a;
+        }
+        .pan-area {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 15px;
+            border: 2px dashed #ddd;
+        }
+        .result-text {
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .cook-btn {
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3);
+            transition: 0.2s;
+        }
+        .cook-btn:hover {
+            background-color: #d81b60;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>🍳 Bếp Trưởng Búp Bê 🍰</h1>
+        <div class="subtitle">Giúp búp bê nấu những món ăn thật ngon nhé!</div>
+        
+        <div class="doll-area" id="doll-face">👧</div>
+        <div class="speech-bubble" id="speech">"Đói bụng quá đi! Bạn nấu món gì cho mình ăn nha?"</div>
+
+        <!-- Chọn nguyên liệu -->
+        <div class="kitchen-section">
+            <h3>1. Chọn nguyên liệu chính:</h3>
+            <div class="ingredients">
+                <button class="item-btn" onclick="selectIng('🦐 Tôm')">🦐 Tôm</button>
+                <button class="item-btn" onclick="selectIng('🥩 Thịt Bò')">🥩 Thịt Bò</button>
+                <button class="item-btn" onclick="selectIng('🌾 Bột Mì')">🌾 Bột Mì</button>
+                <button class="item-btn" onclick="selectIng('🍓 Dâu Tây')">🍓 Dâu Tây</button>
+            </div>
+        </div>
+
+        <!-- Chọn nước sốt / gia vị -->
+        <div class="kitchen-section">
+            <h3>2. Chọn gia vị / kèm theo:</h3>
+            <div class="kitchen-section tools">
+                <button class="item-btn" onclick="selectTool('🍜 Sợi Phở')">🍜 Sợi Phở</button>
+                <button class="item-btn" onclick="selectTool('🧀 Phô Mai')">🧀 Phô Mai</button>
+                <button class="item-btn" onclick="selectTool('🍫 Sốt Sô-cô-la')">🍫 Sô-cô-la</button>
+                <button class="item-btn" onclick="selectTool('🌶️ Ớt Cay')">🌶️ Ớt Cay</button>
+            </div>
+        </div>
+
+        <!-- Khu vực nấu -->
+        <div class="pan-area">
+            <div>🔥 <b>Nồi/Chảo nấu:</b></div>
+            <div class="result-text" id="recipe-status">Chưa có nguyên liệu nào trong nồi...</div>
+            <button class="cook-btn" onclick="cookFood()">✨ Bắt Đầu Nấu! ✨</button>
+        </div>
+    </div>
+
+    <script>
+        let chosenIng = "";
+        let chosenTool = "";
+
+        function selectIng(ing) {
+            chosenIng = ing;
+            updateStatus();
+        }
+
+        function selectTool(tool) {
+            chosenTool = tool;
+            updateStatus();
+        }
+
+        function updateStatus() {
+            let status = "";
+            if (chosenIng && chosenTool) {
+                status = `Đang chuẩn bị: ${chosenIng} + ${chosenTool}`;
+            } else if (chosenIng) {
+                status = `Đã chọn: ${chosenIng} (Thiếu gia vị)`;
+            } else if (chosenTool) {
+                status = `Đã chọn: ${chosenTool} (Thiếu nguyên liệu chính)`;
+            } else {
+                status = "Chưa có nguyên liệu nào trong nồi...";
+            }
+            document.getElementById('recipe-status').innerText = status;
+        }
+
+        function cookFood() {
+            const speech = document.getElementById('speech');
+            const dollFace = document.getElementById('doll-face');
+            const status = document.getElementById('recipe-status');
+
+            if (!chosenIng || !chosenTool) {
+                alert("Bạn hãy chọn đủ nguyên liệu chính và gia vị đã nhé!");
+                return;
+            }
+
+            // Tạo món ăn dựa trên lựa chọn
+            let dishName = "";
+            let reaction = "";
+
+            if (chosenIng.includes('Tôm') && chosenTool.includes('Phở')) {
+                dishName = "🍜 Phở Tôm Hải Sản Thơm Ngon";
+                reaction = "Ngon tuyệt cú mèo! Cảm ơn bạn nha! 🥰";
+                dollFace.innerText = "😋";
+            } else if (chosenIng.includes('Thịt Bò') && chosenTool.includes('Phô Mai')) {
+                dishName = "🥩 Bò Né Phô Mai Béo Ngậy";
+                reaction = "Món này đỉnh quá đi mất! 🤤";
+                dollFace.innerText = "😍";
+            } else if (chosenIng.includes('Bột Mì') && chosenTool.includes('Sô-cô-la')) {
+                dishName = "🧁 Bánh Cupcake Sô-cô-la Ngọt Ngào";
+                reaction = "Ngọt ngào tan chảy luôn! Thích quá! 💖";
+                dollFace.innerText = "🥳";
+            } else if (chosenIng.includes('Dâu Tây') && chosenTool.includes('Sô-cô-la')) {
+                dishName = "🍫🍓 Dâu Tây Nhúng Sô-cô-la";
+                reaction = "Ui chu choa, đúng món khoái khẩu của mình! ✨";
+                dollFace.innerText = "🥰";
+            } else {
+                dishName = `Món lạ: ${chosenIng} kết hợp ${chosenTool}`;
+                reaction = "Hơi lạ miệng chút nhưng bạn nấu thì mình vẫn ăn hết nè! 🤭";
+                dollFace.innerText = "😋";
+            }
+
+            status.innerHTML = `🎉 Thành phẩm: <b>${dishName}</b>`;
+            speech.innerText = `"${reaction}"`;
+        }
+    </script>
+
+</body>
+</html>
