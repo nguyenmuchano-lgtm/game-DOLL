@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cooking Dash - Nhà Hàng Sang Chảnh</title>
+    <title>Cooking Dash - Nhà Hàng Đẳng Cấp</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #1e1e1e;
+            background: #121212;
             font-family: 'Arial', sans-serif;
             display: flex;
             flex-direction: column;
@@ -20,108 +20,108 @@
         }
         #gameCanvas {
             border: 4px solid #d4ac0d;
-            border-radius: 10px;
-            background: #3e2723;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            border-radius: 12px;
+            background: #2c1e12;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
         }
         #instruction {
-            margin-top: 8px;
-            background: #2c3e50;
+            margin-top: 10px;
+            background: #1f2c34;
             padding: 8px 15px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             border: 2px dashed #f39c12;
             text-align: center;
-            max-width: 800px;
+            max-width: 880px;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="gameCanvas" width="850" height="520"></canvas>
-    <div id="instruction"><b>HƯỚNG DẪN:</b> Click vào <b>Máy Nước (Trái)</b>, <b>Bếp Nướng (Phải)</b> hoặc <b>Khay Bánh (Giữa)</b> để lấy đồ -> Sau đó click vào <b>Khách Hàng (Trên cùng)</b> đúng món họ gọi để phục vụ kiếm tiền!</div>
+    <canvas id="gameCanvas" width="880" height="540"></canvas>
+    <div id="instruction"><b>HƯỚNG DẪN:</b> Click vào <b>Máy Nước (Trái)</b>, <b>Khay Bánh (Giữa)</b> hoặc <b>Bếp Nướng Sườn (Phải)</b> để lấy món -> Sau đó click vào <b>Khách Hàng (Phía trên)</b> có bong bóng gọi món tương ứng để phục vụ kiếm điểm và tiền vàng!</div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Thông số trò chơi
-        let score = 265; // Giống ảnh mẫu tiền tệ
-        let money = 450;
+        // Thông số giao diện giống ảnh mẫu
         let level = 13;
+        let coins = 265;
         let xp = 546;
+        let score = 0;
 
-        // Nhân vật đang cầm đồ gì trên tay
         let holdingItem = 'Tay không';
 
-        // Khách hàng (3 slot phía trên)
+        // Danh sách khách hàng (3 bàn phía trên)
         let customers = [
-            { id: 0, type: '👨‍💼', order1: 'Sườn Nướng 🥩', order2: 'Nước Suối 💧', maxTime: 100, time: 100, active: true },
-            { id: 1, type: '👩‍🦰', order1: 'Bánh Ngọt 🥨', order2: null, maxTime: 80, time: 80, active: true },
-            { id: 2, type: '👦', order1: 'Bít Tếch 🍖', order2: 'Nước Suối 💧', maxTime: 90, time: 90, active: true }
+            { id: 0, avatar: '👨‍💼', order1: 'Sườn Nướng 🥩', order2: 'Nước Suối 💧', maxTime: 120, time: 120, active: true },
+            { id: 1, avatar: '👩‍🦰', order1: 'Bánh Pretzel 🥨', order2: null, maxTime: 90, time: 90, active: true },
+            { id: 2, avatar: '👦', order1: 'Bít Tếch 🍖', order2: 'Nước Suối 💧', maxTime: 100, time: 100, active: true }
         ];
 
-        // Lắng nghe sự kiện click chuột tương tác trực tiếp lên Canvas
+        // Lắng nghe sự kiện click chuột tương tác quầy bếp & phục vụ khách
         canvas.addEventListener('click', function(e) {
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
-            // 1. Click vào khu vực Trạm Nước / Máy pha chế (Bên trái: x từ 50 đến 200, y từ 280 đến 450)
-            if (x >= 50 && x <= 220 && y >= 280 && y <= 450) {
+            // 1. Tương tác với Máy Nước (Bên trái: x từ 40 đến 220, y từ 300 đến 480)
+            if (x >= 40 && x <= 220 && y >= 300 && y <= 480) {
                 holdingItem = 'Nước Suối 💧';
             }
-            // 2. Click vào khu vực Khay Bánh / Đồ ăn nhẹ (Ở giữa-trái: x từ 240 && x <= 380)
-            else if (x >= 240 && x <= 380 && y >= 280 && y <= 450) {
-                holdingItem = 'Bánh Ngọt 🥨';
+            // 2. Tương tác với Khay Bánh & Đồ Ăn Nhẹ (Ở giữa: x từ 240 đến 400)
+            else if (x >= 240 && x <= 400 && y >= 300 && y <= 480) {
+                holdingItem = 'Bánh Pretzel 🥨';
             }
-            // 3. Click vào khu vực Bếp Nướng Thịt / Sườn (Bên phải: x từ 620 && x <= 800)
-            else if (x >= 620 && x <= 800 && y >= 280 && y <= 450) {
+            // 3. Tương tác với Bếp Nướng Thịt / Sườn (Bên phải: x từ 630 đến 840)
+            else if (x >= 630 && x <= 840 && y >= 300 && y <= 480) {
                 holdingItem = Math.random() > 0.5 ? 'Sườn Nướng 🥩' : 'Bít Tếch 🍖';
             }
 
-            // 4. Click vào các slot khách hàng để phục vụ (y từ 60 đến 180)
-            if (y >= 60 && y <= 190) {
+            // 4. Tương tác phục vụ khách hàng (Khu vực y từ 60 đến 200)
+            if (y >= 60 && y <= 210) {
                 let slotWidth = canvas.width / 3;
                 let clickedSlot = Math.floor(x / slotWidth);
-                
+
                 if (clickedSlot >= 0 && clickedSlot < 3 && customers[clickedSlot].active) {
                     let cust = customers[clickedSlot];
-                    // Kiểm tra xem món đang cầm có khớp với order1 hoặc order2 của khách không
+                    // Nếu món đang cầm khớp với order1 hoặc order2 của khách
                     if (holdingItem === cust.order1 || holdingItem === cust.order2) {
-                        score += 25;
-                        money += 15;
+                        coins += 15;
+                        score += 30;
+                        xp += 10;
                         holdingItem = 'Tay không';
-                        
-                        // Khách đã nhận đủ món -> rời đi, tạo khách mới sau ít giây
+
+                        // Khách nhận xong món -> rời đi, tạo khách mới sau 2 giây
                         customers[clickedSlot].active = false;
                         setTimeout(() => {
-                            let dishes = ['Sườn Nướng 🥩', 'Bánh Ngọt 🥨', 'Bít Tếch 🍖'];
+                            let dishes = ['Sườn Nướng 🥩', 'Bánh Pretzel 🥨', 'Bít Tếch 🍖'];
                             let drinks = ['Nước Suối 💧', null];
                             customers[clickedSlot] = {
                                 id: clickedSlot,
-                                type: ['👨‍💼', '👩‍🦰', '👦', '🧔'][Math.floor(Math.random()*4)],
-                                order1: dishes[Math.floor(Math.random()*dishes.length)],
-                                order2: drinks[Math.floor(Math.random()*drinks.length)],
-                                maxTime: 100,
-                                time: 100,
+                                avatar: ['👨‍💼', '👩‍🦰', '👦', '🧔', '👩‍🦱'][Math.floor(Math.random() * 5)],
+                                order1: dishes[Math.floor(Math.random() * dishes.length)],
+                                order2: drinks[Math.floor(Math.random() * drinks.length)],
+                                maxTime: 110,
+                                time: 110,
                                 active: true
                             };
-                        }, 2000);
+                        }, 1800);
                     }
                 }
             }
         });
 
         function update() {
-            // Giảm thời gian kiên nhẫn của khách
-            for (let i = 0; i < customers.length; i++) {
+            // Giảm thanh kiên nhẫn của khách theo thời gian thực
+            for (let i = 0; i < 3; i++) {
                 if (customers[i].active) {
-                    customers[i].time -= 0.08;
+                    customers[i].time -= 0.07;
                     if (customers[i].time <= 0) {
-                        // Khách giận dữ bỏ đi vì hết giờ
+                        // Hết giờ khách giận dữ bỏ đi
                         customers[i].time = customers[i].maxTime;
-                        score = Math.max(0, score - 10);
+                        coins = Math.max(0, coins - 10);
                     }
                 }
             }
@@ -130,128 +130,136 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // --- 1. VẼ PHẦN NỀN & THANH TIÊU ĐỀ (HEADER GIỐNG ẢNH MẪU) ---
-            ctx.fillStyle = '#2c1e12';
+            // ================= 1. THANH HEADER (GIỐNG HỆT ẢNH MẪU) =================
+            ctx.fillStyle = '#1a110a';
             ctx.fillRect(0, 0, canvas.width, 50);
 
-            // Khung Menu & Thông số cấp độ
+            // Nút Menu & Level
             ctx.fillStyle = '#f1c40f';
-            ctx.font = 'bold 15px Arial';
-            ctx.fillText('📋 MENU', 30, 30);
-            ctx.fillText(`👥 Level: ${level}`, 120, 30);
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('📋 MENU', 25, 30);
+            ctx.fillText(`👥 Level ${level}`, 110, 30);
 
-            // Tiền tệ & Vàng
+            // Ô Tiền Vàng (Coins)
             ctx.fillStyle = '#27ae60';
-            ctx.fillRect(320, 10, 100, 30);
+            ctx.fillRect(300, 10, 110, 30);
             ctx.fillStyle = '#fff';
-            ctx.fillText(`💰 ${score}`, 340, 30);
+            ctx.fillText(`🪙 ${coins}`, 320, 30);
 
-            // XP Bar
+            // Thanh XP (Kinh nghiệm)
             ctx.fillStyle = '#2980b9';
-            ctx.fillRect(580, 15, 200, 18);
+            ctx.fillRect(570, 15, 240, 18);
             ctx.fillStyle = '#fff';
             ctx.font = '12px Arial';
-            ctx.fillText(`XP: ${xp} / 1000`, 630, 29);
+            ctx.fillText(`XP: ${xp} / 1000`, 640, 29);
 
 
-            // --- 2. KHU VỰC KHÁCH HÀNG & BONG BÓNG GỌI MÓN (PHÍA TRÊN) ---
+            // ================= 2. KHU VỰC KHÁCH HÀNG & BONG BÓNG GỌI MÓN =================
             let slotWidth = canvas.width / 3;
             for (let i = 0; i < 3; i++) {
                 let cust = customers[i];
                 let startX = i * slotWidth;
 
-                // Vẽ bàn khách
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.fillRect(startX + 20, 60, slotWidth - 40, 130);
-                ctx.strokeStyle = '#8d6e63';
+                // Nền khu bàn khách
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                ctx.fillRect(startX + 15, 60, slotWidth - 30, 145);
+                ctx.strokeStyle = '#5d4037';
                 ctx.lineWidth = 2;
-                ctx.strokeRect(startX + 20, 60, slotWidth - 40, 130);
+                ctx.strokeRect(startX + 15, 60, slotWidth - 30, 145);
 
                 if (cust && cust.active) {
-                    // Avatar khách
-                    ctx.font = '40px Arial';
-                    ctx.fillText(cust.type, startX + slotWidth / 2 - 20, 110);
+                    // Avatar nhân vật khách
+                    ctx.font = '42px Arial';
+                    ctx.fillText(cust.avatar, startX + slotWidth / 2 - 20, 115);
 
-                    // Bong bóng gọi món
-                    ctx.fillStyle = '#fff';
+                    // Bong bóng hội thoại gọi món
+                    ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.roundRect(startX + 40, 115, 180, 45, 8);
+                    ctx.roundRect(startX + 25, 122, slotWidth - 50, 52, 8);
                     ctx.fill();
                     ctx.strokeStyle = '#e74c3c';
+                    ctx.lineWidth = 2;
                     ctx.stroke();
 
-                    // Tên món khách gọi
-                    ctx.fillStyle = '#000';
-                    ctx.font = 'bold 12px Arial';
-                    ctx.fillText(`Món: ${cust.order1}`, startX + 50, 133);
+                    // Tên món ăn trong bóng thoại
+                    ctx.fillStyle = '#222';
+                    ctx.font = 'bold 11px Arial';
+                    ctx.fillText(`• ${cust.order1}`, startX + 33, 142);
                     if (cust.order2) {
-                        ctx.fillText(`Nước: ${cust.order2}`, startX + 50, 150);
+                        ctx.fillText(`• ${cust.order2}`, startX + 33, 161);
                     }
 
-                    // Thanh kiên nhẫn (Timer bar)
+                    // Thanh thời gian kiên nhẫn (Timer Bar)
                     ctx.fillStyle = '#ddd';
-                    ctx.fillRect(startX + 40, 168, 180, 6);
-                    ctx.fillStyle = cust.time > 30 ? '#2ecc71' : '#e74c3c';
-                    ctx.fillRect(startX + 40, 168, 180 * (cust.time / cust.maxTime), 6);
+                    ctx.fillRect(startX + 25, 182, slotWidth - 50, 6);
+                    ctx.fillStyle = cust.time > 35 ? '#2ecc71' : '#e74c3c';
+                    ctx.fillRect(startX + 25, 182, (slotWidth - 50) * (cust.time / cust.maxTime), 6);
                 } else {
-                    ctx.fillStyle = '#aaa';
-                    ctx.font = '14px Arial';
-                    ctx.fillText('Bàn trống...', startX + slotWidth / 2 - 40, 130);
+                    ctx.fillStyle = '#888';
+                    ctx.font = '13px Arial';
+                    ctx.fillText('Đang chuẩn bị...', startX + slotWidth / 2 - 45, 135);
                 }
             }
 
 
-            // --- 3. QUẦY BẾP & TRẠM NẤU (PHÍA DƯỚI) ---
-            // Mặt bàn quầy bếp
+            // ================= 3. QUẦY BẾP VÀ TRẠM NẤU (PHÍA DƯỚI) =================
+            // Mặt quầy gỗ sang trọng
+            ctx.fillStyle = '#b94e00';
+            ctx.fillRect(0, 260, canvas.width, 280);
             ctx.fillStyle = '#d35400';
-            ctx.fillRect(0, 250, canvas.width, 270);
-            ctx.fillStyle = '#e67e22';
-            ctx.fillRect(0, 250, canvas.width, 15);
+            ctx.fillRect(0, 260, canvas.width, 15);
 
-            // TRẠM 1: Máy nước (Bên trái)
+            // --- TRẠM 1: MÁY NƯỚC (BÊN TRÁI) ---
             ctx.fillStyle = '#34495e';
-            ctx.fillRect(40, 280, 160, 210);
-            ctx.fillStyle = '#f1c40f';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('🥤 MÁY NƯỚC', 70, 305);
-            // Nút bấm lấy nước
-            ctx.fillStyle = '#3498db';
-            ctx.fillRect(60, 330, 120, 100);
-            ctx.fillStyle = '#fff';
-            ctx.fillText('Click lấy Nước Suối', 68, 385);
-
-            // TRẠM 2: Khay bánh (Ở giữa)
-            ctx.fillStyle = '#2c3e50';
-            ctx.fillRect(230, 280, 160, 210);
-            ctx.fillStyle = '#f1c40f';
-            ctx.fillText('🥨 KHAY BÁNH', 260, 305);
-            ctx.fillStyle = '#e67e22';
-            ctx.fillRect(250, 330, 120, 100);
-            ctx.fillStyle = '#fff';
-            ctx.fillText('Click lấy Bánh Ngọt', 256, 385);
-
-            // TRẠM 3: Bếp nướng thịt / sườn (Bên phải)
-            ctx.fillStyle = '#2c3e50';
-            ctx.fillRect(610, 280, 200, 210);
-            ctx.fillStyle = '#f1c40f';
-            ctx.fillText('🔥 BẾP NƯỚNG SƯỜN', 635, 305);
-            // Lò nướng đang xèo xèo
-            ctx.fillStyle = '#c0392b';
-            ctx.fillRect(630, 330, 160, 100);
-            ctx.fillStyle = '#fff';
-            ctx.fillText('Click nướng Thịt/Sườn', 640, 385);
-
-
-            // --- 4. HIỂN THỊ ĐỒ ĐANG CẦM TRÊN TAY NHÂN VIÊN ---
-            ctx.fillStyle = '#111';
-            ctx.fillRect(420, 420, 170, 45);
+            ctx.fillRect(40, 290, 180, 215);
             ctx.strokeStyle = '#f1c40f';
             ctx.lineWidth = 2;
-            ctx.strokeRect(420, 420, 170, 45);
+            ctx.strokeRect(40, 290, 180, 215);
+            ctx.fillStyle = '#f1c40f';
+            ctx.font = 'bold 13px Arial';
+            ctx.fillText('🥤 MÁY NƯỚC SUỐI', 60, 315);
+            // Nút bấm máy nước
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(55, 340, 150, 140);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('Click lấy Nước Suối', 72, 415);
+
+            // --- TRẠM 2: KHAY BÁNH VÒNG PRETZEL (Ở GIỮA) ---
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(240, 290, 165, 215);
+            ctx.strokeRect(240, 290, 165, 215);
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillText('🥨 KHAY BÁNH NGỌT', 255, 315);
+            // Khay bánh
+            ctx.fillStyle = '#d35400';
+            ctx.fillRect(255, 340, 135, 140);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('Click lấy Bánh', 280, 415);
+
+            // --- TRẠM 3: BẾP NƯỚNG THỊT / SƯỜN (BÊN PHẢI) ---
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(630, 290, 210, 215);
+            ctx.strokeRect(630, 290, 210, 215);
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillText('🔥 BẾP NƯỚNG SƯỜN & BÍT TÉCH', 638, 315);
+            // Lò nướng xèo xèo
+            ctx.fillStyle = '#c0392b';
+            ctx.fillRect(645, 340, 180, 140);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('Click nướng Sườn / Bít Tếch', 655, 415);
+
+
+            // ================= 4. KHUNG HIỂN THỊ ĐỒ TRÊN TAY =================
+            ctx.fillStyle = '#111';
+            ctx.fillRect(425, 450, 190, 45);
+            ctx.strokeStyle = '#f1c40f';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(425, 450, 190, 45);
 
             ctx.fillStyle = '#00ffff';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText(`Trên tay: ${holdingItem}`, 430, 448);
+            ctx.font = 'bold 13px Arial';
+            ctx.fillText(`Trên tay: ${holdingItem}`, 438, 478);
         }
 
         function gameLoop() {
